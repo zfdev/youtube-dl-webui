@@ -13,9 +13,10 @@
     --state-invalid-color: red;
 }
 
-html, body {
+html,
+body {
     height: 100%;
-    font:normal 11px arial,tahoma,verdana,helvetica;
+    font: normal 11px arial, tahoma, verdana, helvetica;
     font-size: 15px;
     color: #0d0d0d;
     display: flex;
@@ -23,7 +24,7 @@ html, body {
 }
 
 a {
-    text-decoration:none;
+    text-decoration: none;
 }
 
 [v-cloak] {
@@ -44,7 +45,7 @@ header {
 
 .operBtns button {
     cursor: pointer;
-    color:#333;
+    color: #333;
     font-size: 13px;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 2px 5px 0 rgba(0, 0, 0, 0.19);
     padding: 3px 10px 3px 10px;
@@ -103,12 +104,13 @@ header {
 .main-body .sidebar-wrapper ul {
     list-style: none;
     height: 100%;
-    margin:0;
-    padding-left:0;:
+    margin: 0;
+    padding-left: 0;
+    :
 }
 
 .main-body .sidebar-wrapper ul li {
-    padding:5px 0;
+    padding: 5px 0;
     display: block;
     cursor: pointer;
 }
@@ -118,21 +120,22 @@ header {
 }
 
 .main-body .videoList-wrapper {
-    margin-left:5px;
+    margin-left: 5px;
     border: 2px solid var(--border-color);
     border-radius: 5px;
     background-color: #fff;
-    flex-grow:1;
+    flex-grow: 1;
     overflow: auto;
 }
 
 table {
-    width:100%;
+    width: 100%;
     border-collapse: collapse;
     border-style: hidden;
 }
 
-table td, table th {
+table td,
+table th {
     border: 2px solid white;
 }
 
@@ -211,7 +214,7 @@ ul.task-info {
     list-style: none;
     display: flex;
     padding: 0;
-    margin:5px 0;
+    margin: 5px 0;
 }
 
 ul.task-info li {
@@ -227,9 +230,9 @@ ul.task-info li {
 }
 
 ul.task-info li.selected {
-    -webkit-box-shadow: inset 0px 1px 3px 0px rgba(0,0,0,0.59);
-    -moz-box-shadow: inset 0px 1px 3px 0px rgba(0,0,0,0.59);
-    box-shadow: inset 0px 1px 3px 0px rgba(0,0,0,0.59);
+    -webkit-box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.59);
+    -moz-box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.59);
+    box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.59);
 }
 
 ul.task-info li:first-of-type {
@@ -245,7 +248,7 @@ ul.task-info li:first-of-type {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    white-space:nowrap;
+    white-space: nowrap;
     padding: 10px;
     margin: 0;
 }
@@ -254,7 +257,7 @@ ul.task-info li:first-of-type {
     font-weight: bold;
     display: inline-block;
     width: var(--tabpane-dt-width);
-    margin-bottom:5px;
+    margin-bottom: 5px;
 }
 
 .tabpane dl dd {
@@ -325,4 +328,9 @@ ul.task-info li:first-of-type {
 .tabpane div.log-container th,
 .tabpane div.log-container td {
     font-size: 12px;
+}
+
+#videoWrapper .operBtns button.isActive {
+    color: orange;
+    background-color: green;
 }

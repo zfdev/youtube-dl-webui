@@ -103,7 +103,7 @@ class Worker(Process):
     def intercept_ydl_opts(self):
         self.ydl_opts['logger'] = self.log_filter
         self.ydl_opts['progress_hooks'] = [self.ydl_hook.dispatcher]
-        self.ydl_opts['noplaylist'] = False
+        self.ydl_opts['noplaylist'] = True
         self.ydl_opts['progress_with_newline'] = True
 
     def run(self):
