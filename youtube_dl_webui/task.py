@@ -20,7 +20,7 @@ from .worker import Worker
 
 class Task(object):
 
-    def __init__(self, tid, msg_cli, ydl_opts={}, info={}, status={}, log_size=10):
+    def __init__(self, tid, msg_cli, ydl_opts={}, info={}, status={}, log_size=10, MSG={}):
         self.logger = logging.getLogger('ydl_webui')
         self.tid = tid
         self.ydl_opts = ydl_opts
@@ -33,6 +33,7 @@ class Task(object):
         self.state = None
         self.elapsed = status['elapsed']
         self.first_run = True if info['valid'] == 0 else False
+        self.MSG = MSG
 
         log_list = json.loads(status['log'])
         for log in log_list:
@@ -50,9 +51,12 @@ class Task(object):
         self.worker = Worker(self.tid, self.info['url'],
                              msg_cli=self.msg_cli,
                              ydl_opts=self.ydl_opts,
-                             first_run=self.first_run)
+                             first_run=self.first_run, MSG=self.MSG)
+
         self.log.appendleft({'time': int(tm), 'type': 'debug', 'msg': 'Task starts...'})
+        
         self.worker.start()
+        
 
     def pause(self):
         self.logger.info('Task pauses, url - %s(%s)' %(self.url, self.tid))
@@ -115,7 +119,7 @@ class TaskManager(object):
     """
     ExerptKeys = ['tid', 'state', 'percent', 'total_bytes', 'title', 'eta', 'speed']
 
-    def __init__(self, db, msg_cli, conf):
+    def __init__(self, db, msg_cli, conf, MSG):
         self.logger = logging.getLogger('ydl_webui')
         self._db = db
         self._msg_cli = msg_cli
@@ -123,6 +127,7 @@ class TaskManager(object):
         self.ydl_conf = conf['youtube_dl']
 
         self._tasks_dict = {}
+        self.MSG = MSG
 
     def new_task(self, url, ydl_opts={}):
         """Create a new task and put it in inactive type"""
@@ -151,7 +156,7 @@ class TaskManager(object):
                 raise TaskError('Task is finished')
 
             task = Task(tid, self._msg_cli, ydl_opts=ydl_opts, info=info,
-                        status=status, log_size=self._conf['general']['log_size'])
+                        status=status, log_size=self._conf['general']['log_size'], MSG=self.MSG)
             self._tasks_dict[tid] = task
 
         task.start()
@@ -234,7 +239,6 @@ class TaskManager(object):
 
     def list(self, state, exerpt=False):
         db_ret, counter = self._db.list_task(state)
-
         detail = []
         if exerpt is not True:
             for item in db_ret:

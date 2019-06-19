@@ -50,9 +50,11 @@
                 <button @click="showRemoveTaskModal"><i class="fa fa-minus" aria-hidden="true"></i> Remove</button>
                 <button @click="pauseTask"><i class="fa fa-pause" aria-hidden="true"></i> Pause</button>
                 <button @click="resumeTask"><i class="fa fa-play" aria-hidden="true"></i> Resume</button>
-                <button @click="preference"><i class="fa fa-cog" aria-hidden="true"></i> Preference</button>
+
                 <button v-bind:class="{isActive: isAutoResumeOn}" @click="autoResumeTask()"><i class="fa fa-download" aria-hidden="true"></i> Auto Resume</button>
                 <button @click="about" style="float:right"><i class="fa fa-question-circle" aria-hidden="true"></i> About</button>
+
+                <button @click="preference" style="float:right"><i class="fa fa-cog" aria-hidden="true"></i> Preference</button>
             </div>
         </header>
         <div class="main-body">
@@ -178,7 +180,7 @@
                             <hr class="left-hr" /><span style="font-weight: bold;">youtube-dl options</span><hr class="right-hr" />
                         </div>
                         <div>
-                            <label>Format:</label><input type="text" ref="format" v-model="modalData.add.ydl_opts.format" v-cloak @keyup.esc="showModal = false"/>
+                            <label>Format:</label><input type="text" ref="format" v-bind:value="modalData.add.ydl_opts.format" v-cloak @keyup.esc="showModal = false"/>
                         </div>
                     </div>
                 </template>

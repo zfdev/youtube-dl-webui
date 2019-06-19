@@ -258,11 +258,11 @@ class Core(object):
         self.logger.debug("configuration: \n%s", json.dumps(self.conf.dict(), indent=4))
 
         self.msg_mgr = MsgMgr()
-        web_cli  = self.msg_mgr.new_cli('server')
+        self.web_cli  = self.msg_mgr.new_cli('server')
         task_cli = self.msg_mgr.new_cli()
 
         self.db = DataBase(self.conf['general']['db_path'])
-        self.task_mgr = TaskManager(self.db, task_cli, self.conf)
+        self.task_mgr = TaskManager(self.db, task_cli, self.conf, MSG = self.web_cli)
 
         WebMsgDispatcher.init(self.conf, self.task_mgr)
         WorkMsgDispatcher.init(self.task_mgr)
@@ -282,7 +282,7 @@ class Core(object):
         self.msg_mgr.reg_event('fatal',      WorkMsgDispatcher.event_fatal)
         self.msg_mgr.reg_event('worker_done',WorkMsgDispatcher.event_worker_done)
 
-        self.server = Server(web_cli, self.conf['server']['host'], self.conf['server']['port'])
+        self.server = Server(self.web_cli, self.conf['server']['host'], self.conf['server']['port'])
 
     def start(self):
         dl_dir = self.conf['general']['download_dir']

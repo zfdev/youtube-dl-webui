@@ -11,6 +11,10 @@ from copy import deepcopy
 
 MSG = None
 
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 app = Flask(__name__)
 
 MSG_INVALID_REQUEST = {'status': 'error', 'errmsg': 'invalid request'}

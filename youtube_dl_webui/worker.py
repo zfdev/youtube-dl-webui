@@ -4,12 +4,14 @@
 import re
 import logging
 import json
+import sys
 
 from youtube_dl import YoutubeDL
 from youtube_dl import DownloadError
 
 from multiprocessing import Process
 from time import time
+
 
 class YdlHook(object):
     def __init__(self, tid, msg_cli):
@@ -31,11 +33,13 @@ class YdlHook(object):
         return d
 
     def error(self, d):
+        # print(json.dumps(d, indent=4))
         self.logger.debug('error status')
         #  d['_percent_str'] = '100%'
         return d
 
     def dispatcher(self, d):
+        # print(json.dumps(d, indent=4))
         if 'total_bytes_estimate' not in d:
             d['total_bytes_estimate'] = 0
         if 'tmpfilename' not in d:
@@ -57,18 +61,21 @@ class LogFilter(object):
         self.msg_cli = msg_cli
 
     def debug(self, msg):
-        self.logger.debug('debug: %s' %(self.ansi_escape(msg)))
-        payload = {'time': int(time()), 'type': 'debug', 'msg': self.ansi_escape(msg)}
+        self.logger.debug('debug: %s' % (self.ansi_escape(msg)))
+        payload = {'time': int(time()), 'type': 'debug',
+                   'msg': self.ansi_escape(msg)}
         self.msg_cli.put('log', {'tid': self.tid, 'data': payload})
 
     def warning(self, msg):
-        self.logger.debug('warning: %s' %(self.ansi_escape(msg)))
-        payload = {'time': int(time()), 'type': 'warning', 'msg': self.ansi_escape(msg)}
+        self.logger.debug('warning: %s' % (self.ansi_escape(msg)))
+        payload = {'time': int(time()), 'type': 'warning',
+                   'msg': self.ansi_escape(msg)}
         self.msg_cli.put('log', {'tid': self.tid, 'data': payload})
 
     def error(self, msg):
-        self.logger.debug('error: %s' %(self.ansi_escape(msg)))
-        payload = {'time': int(time()), 'type': 'warning', 'msg': self.ansi_escape(msg)}
+        self.logger.debug('error: %s' % (self.ansi_escape(msg)))
+        payload = {'time': int(time()), 'type': 'warning',
+                   'msg': self.ansi_escape(msg)}
         self.msg_cli.put('log', {'tid': self.tid, 'data': payload})
 
     def ansi_escape(self, msg):
@@ -84,12 +91,16 @@ class FatalEvent(object):
 
     def invalid_url(self, url):
         self.logger.debug('fatal error: invalid url')
-        payload = {'time': int(time()), 'type': 'fatal', 'msg': 'invalid url: %s' %(url)}
+        payload = {'time': int(time()), 'type': 'fatal',
+                   'msg': 'invalid url: %s' % (url)}
         self.msg_cli.put('fatal', {'tid': self.tid, 'data': payload})
 
 
 class Worker(Process):
-    def __init__(self, tid, url, msg_cli, ydl_opts=None, first_run=False):
+    def __str__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
+
+    def __init__(self, tid, url, msg_cli, ydl_opts=None, first_run=False, MSG={}):
         super(Worker, self).__init__()
         self.logger = logging.getLogger('ydl_webui')
         self.tid = tid
@@ -99,37 +110,75 @@ class Worker(Process):
         self.first_run = first_run
         self.log_filter = LogFilter(tid, msg_cli)
         self.ydl_hook = YdlHook(tid, msg_cli)
+        self.MSG = MSG
 
     def intercept_ydl_opts(self):
         self.ydl_opts['logger'] = self.log_filter
         self.ydl_opts['progress_hooks'] = [self.ydl_hook.dispatcher]
-        self.ydl_opts['noplaylist'] = True
+        self.ydl_opts['noplaylist'] = False
         self.ydl_opts['progress_with_newline'] = True
 
     def run(self):
+        print('Create process success.')
+        sys.stdout.flush()
         self.intercept_ydl_opts()
         with YoutubeDL(self.ydl_opts) as ydl:
+
             try:
-                if self.first_run:
-                    info_dict = ydl.extract_info(self.url, download=False)
+                info_dict = ydl.extract_info(self.url, download=False)
 
-                    #  self.logger.debug(json.dumps(info_dict, indent=4))
+                # self.logger.debug(json.dumps(info_dict, indent=4))
+                # print(json.dumps(info_dict, indent=4))
 
-                    info_dict['description'] = info_dict['description'].replace('\n', '<br />');
-                    payload = {'tid': self.tid, 'data': info_dict}
-                    self.msg_cli.put('info_dict', payload)
+                with open(info_dict['title'] + "-ydl.log", "w") as text_file:
+                    print(json.dumps(info_dict, indent=4), file=text_file)
+                # text_file = open("ydl.log", "w")
+                # text_file.write(json.dumps(info_dict, indent=4))
+                # text_file.close()
+                if '_type' in info_dict:
+                    # MSG.put('create', payload)
+                    # Get all the video url of the playlist and add the payload Object to the database [entries[i].webpage_url]
+                    playListVideos = info_dict.get('entries')
+                    urls = []
+                    for i in playListVideos:
+                        url = i['webpage_url']
+                        urls.append(url)
+                        # payload = {'url': i['webpage_url'], 'ydl_opts': self.ydl_opts}
+                        print(url)
+                        # self.msg_cli.put('create', payload)
+                    if self.first_run:
+                        playlistDict = {
+                            'valid':            1,      # info_dict is updated
+                            'title':            info_dict['title'],
+                            'format':           '',
+                            'ext':              'mp4',
+                            'thumbnail':        info_dict['uploader_url'],
+                            'duration':         0,
+                            'view_count':       0,
+                            'like_count':       0,
+                            'dislike_count':    0,
+                            'average_rating':   0,
+                            'description':      info_dict['webpage_url'],
+                        }
+                        payload = {'tid': self.tid, 'data': playlistDict}
+                        self.msg_cli.put('info_dict', payload)
+                    ydl.download(urls)
+                else:
+                    if self.first_run:
+                        payload = {'tid': self.tid, 'data': info_dict}
+                        self.msg_cli.put('info_dict', payload)
+                    ydl.download([self.url])
+                self.logger.info('start downloading, url - %s' % (self.url))
 
-                self.logger.info('start downloading, url - %s' %(self.url))
-                ydl.download([self.url])
             except DownloadError as e:
                 # url error
                 event_handler = FatalEvent(self.tid, self.msg_cli)
-                event_handler.invalid_url(self.url);
+                event_handler.invalid_url(self.url)
 
         self.msg_cli.put('worker_done', {'tid': self.tid, 'data': {}})
+        # self.logger.info('Process create success.')
 
     def stop(self):
         self.logger.info('Terminating Process ...')
         self.terminate()
         self.join()
-

@@ -64,10 +64,14 @@ var videoDownload = (function(Vue, extendAM) {
                             val.finished +
                             val.paused +
                             val.invalid;
-                        if (val.invalid > 0 && this.isAutoResumeOn) {
-                            this.filterTasks('invalid');
-                            this.resumeFailedTask();
-                        }
+
+                    },
+                    deep: true
+                },
+                //modalData.preference.youtube_dl.format
+                'modalData.preference.youtube_dl.format': {
+                    handler(val, oldVal) {
+                        this.modalData.add.ydl_opts.format = val;
                     },
                     deep: true
                 }
@@ -76,6 +80,7 @@ var videoDownload = (function(Vue, extendAM) {
                 this.resetOptions();
                 this.headPath = window.location.protocol + '//' + window.location.host + '/';
                 setInterval(this.timeOut, 5000);
+                setInterval(this.resumeFailedTask, 30000);
             },
             methods: {
                 autoResumeTask() {
@@ -86,10 +91,14 @@ var videoDownload = (function(Vue, extendAM) {
                     this.getTaskInfoById();
                 },
                 resumeFailedTask() {
-                    if (this.videoList.length > 0 && this.status === 'invalid') {
-                        let resumeVideoId = this.videoList[0].tid;
-                        this.resumeTask(resumeVideoId);
+                    if (this.isAutoResumeOn && this.stateCounter.invalid > 0) {
+                        this.filterTasks('invalid');
+                        if (this.videoList.length > 0 && this.status === 'invalid') {
+                            let resumeVideoId = this.videoList[0].tid;
+                            this.resumeTask(resumeVideoId);
+                        }
                     }
+
                 },
                 getTaskList() {
                     let _self = this;
@@ -133,6 +142,7 @@ var videoDownload = (function(Vue, extendAM) {
                 addTask: function() {
                     var _self = this;
                     var url = _self.headPath + 'task';
+                    console.dir(_self.modalData.add.ydl_opts);
                     for (var key in _self.modalData.add.ydl_opts) {
                         if (_self.modalData.add.ydl_opts[key].trim() == '')
                             delete _self.modalData.add.ydl_opts[key];
@@ -217,11 +227,17 @@ var videoDownload = (function(Vue, extendAM) {
                             return false;
                         } else {
                             config = responseJSON['config'];
-                            _self.modalData.preference.general.download_dir = config.general.download_dir;
-                            _self.modalData.preference.general.db_path = config.general.db_path;
-                            _self.modalData.preference.general.log_size = config.general.log_size;
-                            _self.modalData.preference.youtube_dl.format = config.youtube_dl.format;
-                            _self.modalData.preference.youtube_dl.proxy = config.youtube_dl.proxy;
+                            Vue.set(_self.modalData.preference.general, 'download_dir', config.general.download_dir);
+                            Vue.set(_self.modalData.preference.general, 'db_path', config.general.db_path);
+                            Vue.set(_self.modalData.preference.general, 'log_size', config.general.log_size);
+                            Vue.set(_self.modalData.preference.youtube_dl, 'format', config.youtube_dl.format);
+                            Vue.set(_self.modalData.preference.youtube_dl, 'proxy', config.youtube_dl.proxy);
+
+                            // _self.modalData.preference.general.download_dir = config.general.download_dir;
+                            // _self.modalData.preference.general.db_path = config.general.db_path;
+                            // _self.modalData.preference.general.log_size = config.general.log_size;
+                            // _self.modalData.preference.youtube_dl.format = config.youtube_dl.format;
+                            // _self.modalData.preference.youtube_dl.proxy = config.youtube_dl.proxy;
                         }
                     });
                 },
