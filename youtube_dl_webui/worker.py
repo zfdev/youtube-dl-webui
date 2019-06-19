@@ -125,13 +125,15 @@ class Worker(Process):
         with YoutubeDL(self.ydl_opts) as ydl:
 
             try:
+                self.logger.info('start downloading, url - %s' % (self.url))
                 info_dict = ydl.extract_info(self.url, download=False)
 
                 # self.logger.debug(json.dumps(info_dict, indent=4))
                 # print(json.dumps(info_dict, indent=4))
 
-                with open(info_dict['title'] + "-ydl.log", "w") as text_file:
-                    print(json.dumps(info_dict, indent=4), file=text_file)
+                # with open(self.tid + "-ydl.log", "w") as text_file:
+                #     print(json.dumps(info_dict, indent=4), file=text_file)
+
                 # text_file = open("ydl.log", "w")
                 # text_file.write(json.dumps(info_dict, indent=4))
                 # text_file.close()
@@ -168,7 +170,6 @@ class Worker(Process):
                         payload = {'tid': self.tid, 'data': info_dict}
                         self.msg_cli.put('info_dict', payload)
                     ydl.download([self.url])
-                self.logger.info('start downloading, url - %s' % (self.url))
 
             except DownloadError as e:
                 # url error

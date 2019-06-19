@@ -1,0 +1,16 @@
+{
+    "youtube_dl": {
+        "proxy": "socks5://127.0.0.1:10808",
+        "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+        "download_archive": "archive.txt"
+    },
+    "general": {
+        "download_dir": "D:\\fakeface\\workspace\\youtube-dl-webui\\youtube_dl_webui\\tmp\\youtube_dl",
+        "db_path": "D:\\fakeface\\workspace\\youtube-dl-webui\\youtube_dl_webui\\tmp\\youtube_dl_webui.db",
+        "log_size": 10
+    },
+    "server": {
+        "host": "127.0.0.1",
+        "port": "5000"
+    }
+}
