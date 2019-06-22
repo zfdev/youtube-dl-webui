@@ -20,7 +20,7 @@ from .worker import Worker
 
 class Task(object):
 
-    def __init__(self, tid, msg_cli, ydl_opts={}, info={}, status={}, log_size=10, MSG={}):
+    def __init__(self, tid, msg_cli, ydl_opts={}, info={}, status={}, log_size=10):
         self.logger = logging.getLogger('ydl_webui')
         self.tid = tid
         self.ydl_opts = ydl_opts
@@ -33,7 +33,6 @@ class Task(object):
         self.state = None
         self.elapsed = status['elapsed']
         self.first_run = True if info['valid'] == 0 else False
-        self.MSG = MSG
 
         log_list = json.loads(status['log'])
         for log in log_list:
@@ -51,7 +50,7 @@ class Task(object):
         self.worker = Worker(self.tid, self.info['url'],
                              msg_cli=self.msg_cli,
                              ydl_opts=self.ydl_opts,
-                             first_run=self.first_run, MSG=self.MSG)
+                             first_run=self.first_run)
 
         self.log.appendleft({'time': int(tm), 'type': 'debug', 'msg': 'Task starts...'})
         
@@ -119,7 +118,7 @@ class TaskManager(object):
     """
     ExerptKeys = ['tid', 'state', 'percent', 'total_bytes', 'title', 'eta', 'speed']
 
-    def __init__(self, db, msg_cli, conf, MSG):
+    def __init__(self, db, msg_cli, conf):
         self.logger = logging.getLogger('ydl_webui')
         self._db = db
         self._msg_cli = msg_cli
@@ -127,7 +126,6 @@ class TaskManager(object):
         self.ydl_conf = conf['youtube_dl']
 
         self._tasks_dict = {}
-        self.MSG = MSG
 
     def new_task(self, url, ydl_opts={}):
         """Create a new task and put it in inactive type"""
@@ -152,11 +150,11 @@ class TaskManager(object):
             except TaskInexistenceError as e:
                 raise TaskInexistenceError(e.msg)
 
-            if status['state'] == state_index['finished']:
-                raise TaskError('Task is finished')
+            # if status['state'] == state_index['finished']:
+            #     raise TaskError('Task is finished')
 
             task = Task(tid, self._msg_cli, ydl_opts=ydl_opts, info=info,
-                        status=status, log_size=self._conf['general']['log_size'], MSG=self.MSG)
+                        status=status, log_size=self._conf['general']['log_size'])
             self._tasks_dict[tid] = task
 
         task.start()

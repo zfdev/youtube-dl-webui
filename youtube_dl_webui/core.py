@@ -262,7 +262,7 @@ class Core(object):
         task_cli = self.msg_mgr.new_cli()
 
         self.db = DataBase(self.conf['general']['db_path'])
-        self.task_mgr = TaskManager(self.db, task_cli, self.conf, MSG = self.web_cli)
+        self.task_mgr = TaskManager(self.db, task_cli, self.conf)
 
         WebMsgDispatcher.init(self.conf, self.task_mgr)
         WorkMsgDispatcher.init(self.task_mgr)

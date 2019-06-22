@@ -1,0 +1,67 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+
+        {
+            "name": "Python: YDWUI",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}\\youtube_dl_webui\\__main__.py",
+            "args" : ["-c", "${workspaceFolder}\\youtube_dl_webui\\config.json"],
+            "env": {
+                "FLASK_ENV": "development"
+            },            
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Flask (development mode)",
+            "type": "python",
+            "request": "launch",
+            "module": "flask",
+            "env": {
+                "FLASK_APP": "${workspaceFolder}\\youtube_dl_webui\\server.py",
+                "FLASK_ENV": "development"
+            },
+            "args": [
+                "run",
+                "--no-debugger",
+                "--no-reload"
+            ],
+            "jinja": true
+        },
+        {
+            "name": "YDWUI Flask",
+            "type": "python",
+            "request": "launch",
+            "module": "flask",
+            "env": {
+                "FLASK_APP": "youtube_dl_webui.server",
+                "FLASK_ENV": "development",
+                "FLASK_DEBUG": "0"
+            },
+            "args": [
+                "run",
+                "--no-debugger",
+                "--no-reload"
+            ],
+            "jinja": true
+        },
+        {
+            "name": "Python: Flask (0.11.x or later)",
+            "type": "python",
+            "request": "launch",
+            "module": "flask",
+            "env": {
+                "FLASK_APP": "${workspaceFolder}\\youtube_dl_webui\\server.py",
+                "FLASK_ENV": "development"
+            },
+            "args": [
+                "run"
+            ]
+        },      
+    ]
+}

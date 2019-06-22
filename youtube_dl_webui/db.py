@@ -261,22 +261,25 @@ class DataBase(object):
 
     def update_info(self, tid, info_dict):
         self.logger.debug('db update_info()')
-        info_dict['description'] = info_dict['description'].replace(
-            '\n', '<br />')
-        db_data = {
-            'valid':            1,      # info_dict is updated
-            'title':            info_dict['title'],
-            'format':           info_dict['format'],
-            'ext':              info_dict['ext'],
-            'thumbnail':        info_dict['thumbnail'],
-            'duration':         info_dict['duration'],
-            'view_count':       info_dict['view_count'],
-            'like_count':       info_dict['like_count'],
-            'dislike_count':    info_dict['dislike_count'],
-            'average_rating':   info_dict['average_rating'],
-            'description':      info_dict['description'],
-        }
-        self.update(tid, {'task_info': db_data})
+        if info_dict is not None:
+            info_dict['description'] = info_dict['description'].replace(
+                '\n', '<br />')
+            db_data = {
+                'valid':            1,      # info_dict is updated
+                'title':            info_dict['title'],
+                'format':           info_dict['format'],
+                'ext':              info_dict['ext'],
+                'thumbnail':        info_dict['thumbnail'],
+                'duration':         info_dict['duration'],
+                'view_count':       info_dict['view_count'],
+                'like_count':       info_dict['like_count'],
+                'dislike_count':    info_dict['dislike_count'],
+                'average_rating':   info_dict['average_rating'],
+                'description':      info_dict['description'],
+            }
+            self.update(tid, {'task_info': db_data})
+        else:
+            self.logger.debug('Task info is null:', tid)
 
     def update_log(self, tid, log, exist_test=False):
         if exist_test:

@@ -69,3 +69,22 @@ more.
 [3]: https://github.com/pallets/flask
 [4]: https://hub.docker.com/r/d0u9/youtube-dl-webui/
 
+py -3 __main__.py -c config.json
+
+https://www.youtube.com/watch?v=6mYw53V9RGM&list=RDaIB4lfXne_8
+
+
+{
+    "status": "downloading",
+    "downloaded_bytes": 43169467,
+    "total_bytes": 85694606,
+    "tmpfilename": "\u3010\u7121\u9650HD\u30112019\u6de1\u6c34\u5927\u62dc\u62dc \u8df3\u8df3\u7cd6\u71b1\u821e4(4K HDR)-FmUJHLDWx8w.f137.mp4.part",
+    "filename": "\u3010\u7121\u9650HD\u30112019\u6de1\u6c34\u5927\u62dc\u62dc \u8df3\u8df3\u7cd6\u71b1\u821e4(4K HDR)-FmUJHLDWx8w.f137.mp4",
+    "eta": 2,
+    "speed": 21229817.216811348,
+    "elapsed": 12.288529396057129,
+    "_eta_str": "00:02",
+    "_percent_str": " 50.4%",
+    "_speed_str": "20.25MiB/s",
+    "_total_bytes_str": "81.72MiB"
+}

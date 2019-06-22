@@ -100,7 +100,7 @@ class Worker(Process):
     def __str__(self):
         return str(self.__class__) + ": " + str(self.__dict__)
 
-    def __init__(self, tid, url, msg_cli, ydl_opts=None, first_run=False, MSG={}):
+    def __init__(self, tid, url, msg_cli, ydl_opts=None, first_run=False):
         super(Worker, self).__init__()
         self.logger = logging.getLogger('ydl_webui')
         self.tid = tid
@@ -110,44 +110,48 @@ class Worker(Process):
         self.first_run = first_run
         self.log_filter = LogFilter(tid, msg_cli)
         self.ydl_hook = YdlHook(tid, msg_cli)
-        self.MSG = MSG
 
     def intercept_ydl_opts(self):
         self.ydl_opts['logger'] = self.log_filter
         self.ydl_opts['progress_hooks'] = [self.ydl_hook.dispatcher]
         self.ydl_opts['noplaylist'] = False
         self.ydl_opts['progress_with_newline'] = True
+        self.ydl_opts['continuedl'] = True
+        self.ydl_opts['ignoreerrors'] = True
+        self.ydl_opts['sleep_interval'] = 10
+        self.ydl_opts['retries'] = 999
+
+        # self.ydl_opts['outtmpl'] = '%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s'
+        self.ydl_opts['outtmpl'] = '%(title)s.%(ext)s'
+        self.ydl_opts['writesubtitles'] = True
+        self.ydl_opts['subtitleslangs'] = 'en'
+        self.ydl_opts['convertsubtitles'] = 'srt'
+
 
     def run(self):
         print('Create process success.')
-        sys.stdout.flush()
+        # sys.stdout.flush()
         self.intercept_ydl_opts()
+        # for key in self.ydl_opts:           
+        #     print(key)
+        #     sys.stdout.flush()
+        #     # self.logger.debug(self.ydl_opts[key])
         with YoutubeDL(self.ydl_opts) as ydl:
-
             try:
                 self.logger.info('start downloading, url - %s' % (self.url))
                 info_dict = ydl.extract_info(self.url, download=False)
 
                 # self.logger.debug(json.dumps(info_dict, indent=4))
-                # print(json.dumps(info_dict, indent=4))
+                print(json.dumps(info_dict, indent=4))
 
-                # with open(self.tid + "-ydl.log", "w") as text_file:
-                #     print(json.dumps(info_dict, indent=4), file=text_file)
+                with open(self.tid + "-ydl.json", "w") as text_file:
+                    print(json.dumps(info_dict, indent=4), file=text_file)
 
                 # text_file = open("ydl.log", "w")
                 # text_file.write(json.dumps(info_dict, indent=4))
                 # text_file.close()
-                if '_type' in info_dict:
-                    # MSG.put('create', payload)
+                if info_dict is not None and '_type' in info_dict:
                     # Get all the video url of the playlist and add the payload Object to the database [entries[i].webpage_url]
-                    playListVideos = info_dict.get('entries')
-                    urls = []
-                    for i in playListVideos:
-                        url = i['webpage_url']
-                        urls.append(url)
-                        # payload = {'url': i['webpage_url'], 'ydl_opts': self.ydl_opts}
-                        print(url)
-                        # self.msg_cli.put('create', payload)
                     if self.first_run:
                         playlistDict = {
                             'valid':            1,      # info_dict is updated
@@ -164,7 +168,26 @@ class Worker(Process):
                         }
                         payload = {'tid': self.tid, 'data': playlistDict}
                         self.msg_cli.put('info_dict', payload)
-                    ydl.download(urls)
+
+                    playListVideos = info_dict.get('entries')
+
+                    # print(json.dumps(ydl.params['outtmpl'], indent=4))
+
+                    ydl.params['outtmpl'] = '%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s'
+
+                    # print(json.dumps(ydl.params['outtmpl'], indent=4))
+
+                    # urls = []
+                    for i in playListVideos:
+                        if i is not None:
+                            # url = i['webpage_url']
+                            # urls.append(url)
+                            # payload = {'url': i['webpage_url'], 'ydl_opts': self.ydl_opts}
+                            ydl.process_ie_result(i, download=True)
+                            # print(url)
+                            # self.msg_cli.put('create', payload)                    
+                    # ydl.download(urls)
+                    
                 else:
                     if self.first_run:
                         payload = {'tid': self.tid, 'data': info_dict}

@@ -91,7 +91,7 @@ var videoDownload = (function(Vue, extendAM) {
                     this.getTaskInfoById();
                 },
                 resumeFailedTask() {
-                    if (this.isAutoResumeOn && this.stateCounter.invalid > 0) {
+                    if (this.isAutoResumeOn && this.stateCounter.invalid > 0 && this.stateCounter.downloading <= 2) {
                         this.filterTasks('invalid');
                         if (this.videoList.length > 0 && this.status === 'invalid') {
                             let resumeVideoId = this.videoList[0].tid;
@@ -113,6 +113,7 @@ var videoDownload = (function(Vue, extendAM) {
                     });
                 },
                 showAddTaskModal: function() {
+                    this.preference();
                     this.modalData.add.url = '';
                     this.showModal = true;
                     this.modalType = 'addTask';
@@ -198,7 +199,7 @@ var videoDownload = (function(Vue, extendAM) {
                 },
                 resumeTask: function(videoId) {
                     var _self = this;
-                    videoId = videoId ? videoId : (_self.videoList[_self.currentSelected] && _self.videoList[_self.currentSelected].tid);
+                    videoId = videoId && typeof videoId === 'string' ? videoId : (_self.videoList[_self.currentSelected] && _self.videoList[_self.currentSelected].tid);
                     if (videoId) {
                         var url = _self.headPath + 'task/tid/' + videoId + '?act=resume';
                         Vue.http.put(url).then(function(res) {
